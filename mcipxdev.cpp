@@ -24,15 +24,14 @@
 
 // definitions
 #define IPX_DEVICE_CLASS_ID         Class_ID(0x475e5012, 0xa20a1115)
-#define IPX_DEVICEBINDING_CLASS_ID  Class_ID(0x6cd5a295, 0x963dabe4)
-
-#define IDS_IPX_DEVICENAME          L"iPhoneX Input Device"
+#define IDS_IPX_DEVICE_BINDING_NAME L"iPhoneX AR Face Capture"
+#define IDS_IPX_DEVICE_NAME         L"iPhoneX Input Device"
 
 
 // declear
 static MCInputDevice* GetIpxDevice();
 
-class IpxDeviceBinding : public MCDeviceBinding
+class IpxDeviceBinding : public MCDeviceBinding, public QObject
 {
 public:
     IpxDeviceBinding() {}
@@ -40,11 +39,18 @@ public:
 public:
     // inherit from MCDeviceBinding
     MCInputDevice *GetDevice() { return GetIpxDevice(); }
-    MSTR BindingName() { return L"iPhoneX AR Face Capture"; }
+    MSTR BindingName() { return IDS_IPX_DEVICE_BINDING_NAME; }
     float Eval(TimeValue t);
     void DeleteThis() { delete this; }
     void AddRollup(IMCParamDlg *dlg);
     void UpdateRollup(IRollupWindow *iRoll);
+
+private:
+    void DoSomething();
+
+private:
+    QWidget *widget;
+    Ui::PluginRollup ui;
 };
 
 class IpxDevice : public MCInputDevice
@@ -54,7 +60,7 @@ public:
 
 public:
     // inherit functions
-    MSTR DeviceName() { return IDS_IPX_DEVICENAME; }
+    MSTR DeviceName() { return IDS_IPX_DEVICE_NAME; }
     MCDeviceBinding *CreateBinding() { return new IpxDeviceBinding; }
 };
 
@@ -66,7 +72,7 @@ class IpxDeviceClassDesc : public ClassDesc2
 public:
     int				IsPublic() { return 1; }
     void*			Create(BOOL loading) { return GetIpxDevice(); }
-    const TCHAR*	ClassName() { return IDS_IPX_DEVICENAME; }
+    const TCHAR*	ClassName() { return IDS_IPX_DEVICE_NAME; }
     SClass_ID		SuperClassID() { return MOT_CAP_DEV_CLASS_ID; }
     Class_ID		ClassID() { return IPX_DEVICE_CLASS_ID; }
     const TCHAR*	Category() { return _T(""); }
@@ -88,8 +94,16 @@ static MCInputDevice *GetIpxDevice()
     return &theIpxDevice;
 }
 
+#include <chrono>
+#include <cmath>
+
 float IpxDeviceBinding::Eval(TimeValue t)
 {
+
+    auto d = std::chrono::system_clock::now().time_since_epoch();
+    auto mil = std::chrono::duration_cast<std::chrono::milliseconds>(d);
+    auto x = std::sinf(mil.count() / 1000.0f);
+
     //float val = 0.0f;
     //if (which == MC_MOUSE_X) {
     //    return theMouseDevice.DX() * scale * (invert ? -1.0f : 1.0f);
@@ -97,7 +111,7 @@ float IpxDeviceBinding::Eval(TimeValue t)
     //else {
     //    return theMouseDevice.DY() * scale * (invert ? -1.0f : 1.0f);
     //}
-    return 0.0f;
+    return x;
 }
 
 //RefTargetHandle IpxDeviceBinding::Clone(RemapDir& remap)
@@ -117,98 +131,32 @@ float IpxDeviceBinding::Eval(TimeValue t)
 
 void IpxDeviceBinding::AddRollup(IMCParamDlg *dlg)
 {
-    //dlg->iRoll->AppendRollup(
-    //    hInstance,
-    //    MAKEINTRESOURCE(IDD_MC_MOUSE),
-    //    MouseDeviceDlgProc,
-    //    GetString(IDS_RB_MOUSEDEVICE),
-    //    (LPARAM)dlg);
-
-    auto widget = new QWidget;
-    dlg->iRoll->AppendRollup(*widget, IDS_IPX_DEVICENAME, APPENDROLL_CLOSED, ROLLUP_CAT_STANDARD);
+    widget = new QWidget;
+    ui.setupUi(widget);
+    QObject::connect(ui.pushButton, &QPushButton::clicked, this, &IpxDeviceBinding::DoSomething);
 
 
-    //widget = new QWidget;
-    //this->iu = iu;
-    //ui.setupUi(widget);
-
-    //// We can connect UI signals here using Qt Functor syntax
-    //QObject::connect(ui.pushButton, &QPushButton::clicked, this, &mcipxdev::DoSomething);
-    //ip->AddRollupPage(*widget, L"Plug-in Rollup");
+    dlg->iRoll->AppendRollup(*widget, IDS_IPX_DEVICE_NAME, APPENDROLL_CLOSED, ROLLUP_CAT_STANDARD);
 }
 
 void IpxDeviceBinding::UpdateRollup(IRollupWindow *iRoll)
 {
-    if (iRoll->GetNumPanels() > 1) {
-        HWND hWnd = iRoll->GetPanelDlg(1);
-        if (hWnd) {
-            // UpdateRollup(hWnd);
-        }
-    }
 }
 
-//--- iPhoneX device ---------------------------------------------------
-
-class mcipxdev : public UtilityObj, public QObject
-{
-public:
-    // Constructor/Destructor
-    mcipxdev() : iu(nullptr) {}
-    virtual ~mcipxdev() {}
-
-    virtual void DeleteThis() override {}
-
-    virtual void BeginEditParams(Interface *ip, IUtil *iu) override;
-    virtual void EndEditParams(Interface *ip, IUtil *iu) override;
-
-    virtual void Init(HWND hWnd);
-    virtual void Destroy(HWND hWnd);
-
-    // Singleton access
-    static mcipxdev* GetInstance()
-    {
-        static mcipxdev themcipxdev;
-        return &themcipxdev;
-    }
-
-private:
-    void DoSomething();
-    QWidget *widget;
-    Ui::PluginRollup ui;
-    IUtil* iu;
-};
-
-//--- mcipxdev -------------------------------------------------------
-
-void mcipxdev::BeginEditParams(Interface* ip, IUtil* iu)
-{
-    this->iu = iu;
-    widget = new QWidget;
-    ui.setupUi(widget);
-
-    // We can connect UI signals here using Qt Functor syntax
-    QObject::connect(ui.pushButton, &QPushButton::clicked, this, &mcipxdev::DoSomething);
-    ip->AddRollupPage(*widget, L"Plug-in Rollup");
-}
-
-void mcipxdev::EndEditParams(Interface* ip, IUtil*)
-{
-    this->iu = nullptr;
-    ip->DeleteRollupPage(*widget);
-}
-
-void mcipxdev::Init(HWND /*handle*/)
-{
-
-}
-
-void mcipxdev::Destroy(HWND /*handle*/)
-{
-
-}
-
-void mcipxdev::DoSomething()
+void IpxDeviceBinding::DoSomething()
 {
     int spin_value = ui.spinBox->value();
     QMessageBox::information(widget, "Dialog", QString("Spinner value: %1").arg(spin_value));
 }
+
+
+//--- iPhoneX device ---------------------------------------------------
+
+
+//--- mcipxdev -------------------------------------------------------
+
+//void mcipxdev::EndEditParams(Interface* ip, IUtil*)
+//{
+//    this->iu = nullptr;
+//    ip->DeleteRollupPage(*widget);
+//}
