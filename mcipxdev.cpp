@@ -1,29 +1,81 @@
-//**************************************************************************/
-// Copyright (c) 1998-2018 Autodesk, Inc.
-// All rights reserved.
-// 
-// Use of this software is subject to the terms of the Autodesk license 
-// agreement provided at the time of installation or download, or which 
-// otherwise accompanies this software in either electronic or hard copy form.
-//**************************************************************************/
-// DESCRIPTION: Appwizard generated plugin
-// AUTHOR: 
-//***************************************************************************/
+/**********************************************************************
+ *<
+   FILE: mcdevice.cpp
+
+   DESCRIPTION: Devices for the motion manager
+
+   CREATED BY: Wang Xiaobin
+
+   HISTORY: 2021.03.19
+
+ *>   Copyright (c) 2021, All Rights Reserved.
+ **********************************************************************/
 
 #include "mcipxdev.h"
 
+// maxsdk header
+#include "mcapdev.h"
+#include "3dsmaxport.h"
+
+// qt header
 #include "ui_plugin_form.h"
 #include "qmessagebox.h"
 #include "qobject.h"
 
-#define mcipxdev_CLASS_ID Class_ID(0x475e5012, 0xa20a1115)
+#define IPX_DEVICE_CLASS_ID Class_ID(0x475e5012, 0xa20a1115)
+// #define IPX_DEVICEBINDING_CLASS_ID  Class_ID(0x6cd5a295, 0x963dabe4)
+
+// declear
+static MCInputDevice* GetIpxDevice();
+
+class IpxDeviceBinding : public MCDeviceBinding
+{
+public:
+    IpxDeviceBinding() {}
+
+public:
+    // inherit functions
+    MCInputDevice *GetDevice() { return GetIpxDevice(); }
+    MSTR BindingName() { return L"iPhoneX AR Face Capture"; }
+    float Eval(TimeValue t);
+    void DeleteThis() { delete this; }
+    virtual void AddRollup(IMCParamDlg *dlg);
+    virtual void UpdateRollup(IRollupWindow *iRoll);
+};
+
+// dummy
+float IpxDeviceBinding::Eval(TimeValue t) { return 0; }
+void IpxDeviceBinding::AddRollup(IMCParamDlg *dlg) {}
+void IpxDeviceBinding::UpdateRollup(IRollupWindow *iRoll) {}
+
+
+class IpxDevice : public MCInputDevice
+{
+public:
+    IpxDevice() {}
+
+public:
+    // inherit functions
+    MSTR DeviceName() { return L"iPhoneX Input Device"; }
+    MCDeviceBinding *CreateBinding() { return new IpxDeviceBinding; }
+};
+
+//--- Class Descriptor -----------------------------------------------
+//--- iPhoneX device binding ---------------------------------------------------
+
+static INT_PTR CALLBACK IpxDeviceDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
+static IpxDevice theIpxDevice;
+static MCInputDevice *GetIpxDevice() { return &theIpxDevice; }
+
+//--- iPhoneX device ---------------------------------------------------
 
 class mcipxdev : public UtilityObj, public QObject
 {
 public:
     // Constructor/Destructor
-    mcipxdev();
-    virtual ~mcipxdev();
+    mcipxdev() : iu(nullptr) {}
+    virtual ~mcipxdev() {}
 
     virtual void DeleteThis() override {}
 
@@ -55,7 +107,7 @@ public:
     virtual void*         Create(BOOL /*loading = FALSE*/) override { return mcipxdev::GetInstance(); }
     virtual const TCHAR * ClassName() override { return GetString(IDS_CLASS_NAME); }
     virtual SClass_ID     SuperClassID() override { return UTILITY_CLASS_ID; }
-    virtual Class_ID      ClassID() override { return mcipxdev_CLASS_ID; }
+    virtual Class_ID      ClassID() override { return IPX_DEVICE_CLASS_ID; }
     virtual const TCHAR*  Category() override { return GetString(IDS_CATEGORY); }
 
     virtual const TCHAR*  InternalName() override { return _T("mcipxdev"); } // Returns fixed parsable name (scripter-visible name)
@@ -71,19 +123,7 @@ ClassDesc2* GetmcipxdevDesc()
 }
 
 
-
-
 //--- mcipxdev -------------------------------------------------------
-mcipxdev::mcipxdev()
-    : iu(nullptr)
-{
-
-}
-
-mcipxdev::~mcipxdev()
-{
-
-}
 
 void mcipxdev::BeginEditParams(Interface* ip, IUtil* iu)
 {
