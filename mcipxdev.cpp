@@ -38,20 +38,14 @@ public:
     IpxDeviceBinding() {}
 
 public:
-    // inherit functions
+    // inherit from MCDeviceBinding
     MCInputDevice *GetDevice() { return GetIpxDevice(); }
     MSTR BindingName() { return L"iPhoneX AR Face Capture"; }
     float Eval(TimeValue t);
     void DeleteThis() { delete this; }
-    virtual void AddRollup(IMCParamDlg *dlg);
-    virtual void UpdateRollup(IRollupWindow *iRoll);
+    void AddRollup(IMCParamDlg *dlg);
+    void UpdateRollup(IRollupWindow *iRoll);
 };
-
-// dummy
-float IpxDeviceBinding::Eval(TimeValue) { return 0; }
-void IpxDeviceBinding::AddRollup(IMCParamDlg *) {}
-void IpxDeviceBinding::UpdateRollup(IRollupWindow *) {}
-
 
 class IpxDevice : public MCInputDevice
 {
@@ -92,6 +86,65 @@ static MCInputDevice *GetIpxDevice()
 {
     static IpxDevice theIpxDevice;
     return &theIpxDevice;
+}
+
+float IpxDeviceBinding::Eval(TimeValue t)
+{
+    //float val = 0.0f;
+    //if (which == MC_MOUSE_X) {
+    //    return theMouseDevice.DX() * scale * (invert ? -1.0f : 1.0f);
+    //}
+    //else {
+    //    return theMouseDevice.DY() * scale * (invert ? -1.0f : 1.0f);
+    //}
+    return 0.0f;
+}
+
+//RefTargetHandle IpxDeviceBinding::Clone(RemapDir& remap)
+//{
+//    IpxDeviceBinding *b = new IpxDeviceBinding;
+//    b->which = which;
+//    b->invert = invert;
+//    b->scale = scale;
+//    BaseClone(this, b, remap);
+//    return b;
+//}
+
+//void IpxDeviceBinding::BeginActivate(BOOL reset)
+//{
+//    if (reset) theMouseDevice.ZeroMouse();
+//}
+
+void IpxDeviceBinding::AddRollup(IMCParamDlg *dlg)
+{
+    //dlg->iRoll->AppendRollup(
+    //    hInstance,
+    //    MAKEINTRESOURCE(IDD_MC_MOUSE),
+    //    MouseDeviceDlgProc,
+    //    GetString(IDS_RB_MOUSEDEVICE),
+    //    (LPARAM)dlg);
+
+    auto widget = new QWidget;
+    dlg->iRoll->AppendRollup(*widget, IDS_IPX_DEVICENAME, APPENDROLL_CLOSED, ROLLUP_CAT_STANDARD);
+
+
+    //widget = new QWidget;
+    //this->iu = iu;
+    //ui.setupUi(widget);
+
+    //// We can connect UI signals here using Qt Functor syntax
+    //QObject::connect(ui.pushButton, &QPushButton::clicked, this, &mcipxdev::DoSomething);
+    //ip->AddRollupPage(*widget, L"Plug-in Rollup");
+}
+
+void IpxDeviceBinding::UpdateRollup(IRollupWindow *iRoll)
+{
+    if (iRoll->GetNumPanels() > 1) {
+        HWND hWnd = iRoll->GetPanelDlg(1);
+        if (hWnd) {
+            // UpdateRollup(hWnd);
+        }
+    }
 }
 
 //--- iPhoneX device ---------------------------------------------------
