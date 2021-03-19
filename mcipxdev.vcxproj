@@ -33,7 +33,7 @@
     <OutDir Condition="'$(Platform)'=='x64'">D:\Program Files\Autodesk\3ds Max 2021\Plugins\</OutDir>
     <IntDir>$(ProjectDir)\obj\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>mcipxdev</TargetName>
-    <TargetExt>.dlu</TargetExt>
+    <TargetExt>.dlc</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>

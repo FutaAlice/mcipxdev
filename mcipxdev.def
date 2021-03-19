@@ -1,4 +1,4 @@
-LIBRARY mcipxdev.dlu
+LIBRARY mcipxdev.dlc
 EXPORTS
    LibDescription       @1       PRIVATE
    LibNumberClasses     @2       PRIVATE
