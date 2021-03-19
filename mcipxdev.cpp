@@ -48,9 +48,9 @@ public:
 };
 
 // dummy
-float IpxDeviceBinding::Eval(TimeValue t) { return 0; }
-void IpxDeviceBinding::AddRollup(IMCParamDlg *dlg) {}
-void IpxDeviceBinding::UpdateRollup(IRollupWindow *iRoll) {}
+float IpxDeviceBinding::Eval(TimeValue) { return 0; }
+void IpxDeviceBinding::AddRollup(IMCParamDlg *) {}
+void IpxDeviceBinding::UpdateRollup(IRollupWindow *) {}
 
 
 class IpxDevice : public MCInputDevice
@@ -66,25 +66,8 @@ public:
 
 //--- Class Descriptor -----------------------------------------------
 
-/*
-// ClassDesc for Device Binding
-class IpxDeviceBindingClassDesc :public ClassDesc
-{
-public:
-    int				IsPublic() { return 0; }
-    void*			Create(BOOL loading) { return new IpxDeviceBinding; }
-    const TCHAR*	ClassName() { return GetString(IDS_KBD_DEVICENAME); }
-    SClass_ID		SuperClassID() { return MOT_CAP_DEVBINDING_CLASS_ID; }
-    Class_ID		ClassID() { return KBD_DEVICEBINDING_CLASS_ID; }
-    const TCHAR*	Category() { return _T(""); }
-};
-
-static IpxDeviceBindingClassDesc ipxBindCD;
-ClassDesc* GetIpxBindingClassDesc() { return &ipxBindCD; }
-*/
-
 // ClassDesc for Device
-class IpxDeviceClassDesc : public ClassDesc
+class IpxDeviceClassDesc : public ClassDesc2
 {
 public:
     int				IsPublic() { return 1; }
@@ -95,7 +78,7 @@ public:
     const TCHAR*	Category() { return _T(""); }
 };
 
-ClassDesc* GetIpxDeviceClassDesc()
+ClassDesc2* GetIpxDeviceClassDesc()
 {
     static IpxDeviceClassDesc ipxDeviceCD; 
     return &ipxDeviceCD;
@@ -105,8 +88,11 @@ ClassDesc* GetIpxDeviceClassDesc()
 
 static INT_PTR CALLBACK IpxDeviceDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-static IpxDevice theIpxDevice;
-static MCInputDevice *GetIpxDevice() { return &theIpxDevice; }
+static MCInputDevice *GetIpxDevice()
+{
+    static IpxDevice theIpxDevice;
+    return &theIpxDevice;
+}
 
 //--- iPhoneX device ---------------------------------------------------
 
@@ -138,30 +124,6 @@ private:
     Ui::PluginRollup ui;
     IUtil* iu;
 };
-
-
-class mcipxdevClassDesc : public ClassDesc2
-{
-public:
-    virtual int           IsPublic() override { return TRUE; }
-    virtual void*         Create(BOOL /*loading = FALSE*/) override { return mcipxdev::GetInstance(); }
-    virtual const TCHAR * ClassName() override { return GetString(IDS_CLASS_NAME); }
-    virtual SClass_ID     SuperClassID() override { return UTILITY_CLASS_ID; }
-    virtual Class_ID      ClassID() override { return IPX_DEVICE_CLASS_ID; }
-    virtual const TCHAR*  Category() override { return GetString(IDS_CATEGORY); }
-
-    virtual const TCHAR*  InternalName() override { return _T("mcipxdev"); } // Returns fixed parsable name (scripter-visible name)
-    virtual HINSTANCE     HInstance() override { return hInstance; } // Returns owning module handle
-
-
-};
-
-ClassDesc2* GetmcipxdevDesc()
-{
-    static mcipxdevClassDesc mcipxdevDesc;
-    return &mcipxdevDesc;
-}
-
 
 //--- mcipxdev -------------------------------------------------------
 

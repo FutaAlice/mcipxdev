@@ -12,7 +12,9 @@
 
 #include "mcipxdev.h"
 
-extern ClassDesc* GetIpxDeviceClassDesc();
+#define IDS_LIBDESCRIPTION L"iPhoneX Controller for Motion Capture (H3D)"
+
+extern ClassDesc2* GetIpxDeviceClassDesc();
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -39,7 +41,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, ULONG fdwReason, LPVOID /*lpvReserved*/)
 // could purchase the DLL if they don't have it.
 __declspec(dllexport) const TCHAR* LibDescription()
 {
-    return GetString(IDS_LIBDESCRIPTION);
+    return IDS_LIBDESCRIPTION;
 }
 
 // This function returns the number of plug-in classes this DLL
@@ -87,15 +89,3 @@ __declspec(dllexport) int LibShutdown(void)
 #pragma message(TODO("Perform un-initialization here."))
     return TRUE;
 }
-
-TCHAR *GetString(int id)
-{
-    static TCHAR buf[256];
-
-    if (hInstance) {
-        return LoadString(hInstance, id, buf, _countof(buf)) ? buf : NULL;
-    }
-
-    return NULL;
-}
-
