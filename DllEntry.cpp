@@ -12,7 +12,7 @@
 
 #include "mcipxdev.h"
 
-extern ClassDesc2* GetmcipxdevDesc();
+extern ClassDesc* GetIpxDeviceClassDesc();
 
 HINSTANCE hInstance;
 int controlsInit = FALSE;
@@ -53,8 +53,10 @@ __declspec(dllexport) int LibNumberClasses()
 __declspec(dllexport) ClassDesc* LibClassDesc(int i)
 {
     switch (i) {
-    case 0: return GetmcipxdevDesc();
-    default: return 0;
+    case 0:
+        return GetIpxDeviceClassDesc();
+    default:
+        return NULL;
     }
 }
 

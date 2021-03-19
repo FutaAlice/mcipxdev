@@ -22,8 +22,12 @@
 #include "qmessagebox.h"
 #include "qobject.h"
 
-#define IPX_DEVICE_CLASS_ID Class_ID(0x475e5012, 0xa20a1115)
-// #define IPX_DEVICEBINDING_CLASS_ID  Class_ID(0x6cd5a295, 0x963dabe4)
+// definitions
+#define IPX_DEVICE_CLASS_ID         Class_ID(0x475e5012, 0xa20a1115)
+#define IPX_DEVICEBINDING_CLASS_ID  Class_ID(0x6cd5a295, 0x963dabe4)
+
+#define IDS_IPX_DEVICENAME          L"iPhoneX Input Device"
+
 
 // declear
 static MCInputDevice* GetIpxDevice();
@@ -56,11 +60,47 @@ public:
 
 public:
     // inherit functions
-    MSTR DeviceName() { return L"iPhoneX Input Device"; }
+    MSTR DeviceName() { return IDS_IPX_DEVICENAME; }
     MCDeviceBinding *CreateBinding() { return new IpxDeviceBinding; }
 };
 
 //--- Class Descriptor -----------------------------------------------
+
+/*
+// ClassDesc for Device Binding
+class IpxDeviceBindingClassDesc :public ClassDesc
+{
+public:
+    int				IsPublic() { return 0; }
+    void*			Create(BOOL loading) { return new IpxDeviceBinding; }
+    const TCHAR*	ClassName() { return GetString(IDS_KBD_DEVICENAME); }
+    SClass_ID		SuperClassID() { return MOT_CAP_DEVBINDING_CLASS_ID; }
+    Class_ID		ClassID() { return KBD_DEVICEBINDING_CLASS_ID; }
+    const TCHAR*	Category() { return _T(""); }
+};
+
+static IpxDeviceBindingClassDesc ipxBindCD;
+ClassDesc* GetIpxBindingClassDesc() { return &ipxBindCD; }
+*/
+
+// ClassDesc for Device
+class IpxDeviceClassDesc : public ClassDesc
+{
+public:
+    int				IsPublic() { return 1; }
+    void*			Create(BOOL loading) { return GetIpxDevice(); }
+    const TCHAR*	ClassName() { return IDS_IPX_DEVICENAME; }
+    SClass_ID		SuperClassID() { return MOT_CAP_DEV_CLASS_ID; }
+    Class_ID		ClassID() { return IPX_DEVICE_CLASS_ID; }
+    const TCHAR*	Category() { return _T(""); }
+};
+
+ClassDesc* GetIpxDeviceClassDesc()
+{
+    static IpxDeviceClassDesc ipxDeviceCD; 
+    return &ipxDeviceCD;
+}
+
 //--- iPhoneX device binding ---------------------------------------------------
 
 static INT_PTR CALLBACK IpxDeviceDlgProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
